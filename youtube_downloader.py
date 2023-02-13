@@ -1,5 +1,5 @@
 import logging
-from os import getcwd
+from os import getcwd, system, name
 from pytube import YouTube, request, exceptions as e
 from pytube.cli import on_progress
 from shutil import rmtree
@@ -43,23 +43,25 @@ def gerenciador_de_downloads(url_do_video):
         logging.warning(f'Descrição da exceção: {type(exception).__name__}')
         return
 
+    system('cls' if name == 'nt' else 'clear')
+
     titulo_do_video = remover_caracteres_especiais(objeto.title)
-    print(f'Título do vídeo: "{titulo_do_video}"')
+    print(f'Título do vídeo: "{titulo_do_video}"', end='\n\n')
 
     video = objeto.streams.filter(adaptive=True, file_extension='webm', type='video').first()
     audio = objeto.streams.filter(adaptive=True, file_extension='webm', type='audio').last()
 
     print('Baixando o vídeo em separado...')
-    video.download(pasta_temporaria, f'{titulo_do_video}-video.webm'); print()
+    video.download(pasta_temporaria, f'{titulo_do_video}-video.webm'); print('', end='\n')
     print('Baixando a faixa de áudio...')
-    audio.download(pasta_temporaria, f'{titulo_do_video}-audio.webm'); print()
-    print('Mesclando os arquivos...')
+    audio.download(pasta_temporaria, f'{titulo_do_video}-audio.webm'); print('', end='\n')
+    print('Mesclando os arquivos...', end='\n\n')
     mesclando_arquivos(titulo_do_video)
 
     localização = pasta_destino + titulo_do_video + '.mkv'
     tamanho_em_mb = str(round(video.filesize_mb + audio.filesize_mb, 2)).replace('.', ',')
 
-    print(f'O vídeo foi salvo em: "{localização}"')
+    print(f'O vídeo foi armazenado em: "{localização}"')
     print(f'Tamanho do arquivo: {tamanho_em_mb} MB')
 
 if __name__ == '__main__':
