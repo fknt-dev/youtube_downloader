@@ -1,41 +1,41 @@
-import os
-import subprocess
+from os import getcwd, remove, removedirs
 from pytube import YouTube
-from os import getcwd
+from subprocess import run
 
-def mixar_arquivos(nome_do_video):
-    pasta_local = getcwd() + '\\Videos\\'
-    pasta_temporaria = getcwd() + '\\Temp\\'
+pasta_destino = getcwd() + '\\Vídeos\\'
+pasta_temporaria = getcwd() + '\\Temp\\'
 
-    video = pasta_temporaria + nome_do_video + '-video.webm'
-    audio = pasta_temporaria + nome_do_video + '-audio.webm'
-    saida = pasta_local + nome_do_video + '.mkv'
+def mixar_arquivos(titulo_do_video):
+    video = pasta_temporaria + f'{titulo_do_video}-video.webm'
+    audio = pasta_temporaria + f'{titulo_do_video}-audio.webm'
+    saida = pasta_destino + f'{titulo_do_video}.mkv'
 
-    subprocess.run(f'mkvmerge -o "{saida}" "{video}" "{audio}" -q')
-    os.remove(f'{video}'); os.remove(f'{audio}'); os.removedirs(pasta_temporaria)
+    run(f'mkvmerge -o "{saida}" "{video}" "{audio}" -q')
+    remove(video); remove(audio); removedirs(pasta_temporaria)
 
-def main():
+def gerenciador_de_downloads():
     url_do_video = input('Digite o link do vídeo: ')
     yt = YouTube(url_do_video)
+    titulo_do_video = yt.title
 
-    pasta_destino = getcwd() + '\\Videos\\'
-    pasta_temporaria = getcwd() + '\\Temp\\'
+    caracteres_especiais = '\/:*?"<>|'
+    for caractere in caracteres_especiais:
+        if caractere in titulo_do_video:
+            titulo_do_video = titulo_do_video.replace(caractere, '-')
 
     video = yt.streams.get_by_itag(248)
     audio = yt.streams.get_by_itag(251)
 
-    titulo_do_video = yt.title
     print(f'Baixando: "{titulo_do_video}"')
-
-    video.download(pasta_temporaria, titulo_do_video+'-video.webm')
-    audio.download(pasta_temporaria, titulo_do_video+'-audio.webm')
-
-    localização = pasta_destino + titulo_do_video + '.mkv'
-    print(f'Localização: "{localização}"')
-    tamanho_em_mb = round(video.filesize_mb + audio.filesize_mb, 2)
-    print(f'Tamanho do arquivo: {tamanho_em_mb} MB')
+    video.download(pasta_temporaria, f'{titulo_do_video}-video.webm')
+    audio.download(pasta_temporaria, f'{titulo_do_video}-audio.webm')
 
     mixar_arquivos(titulo_do_video)
 
+    localização = pasta_destino + titulo_do_video + '.mkv'
+    tamanho_em_mb = round(video.filesize_mb + audio.filesize_mb, 2)
+    print(f'Localização: "{localização}"')
+    print(f'Tamanho do arquivo: {tamanho_em_mb} MB')
+
 if __name__ == '__main__':
-    main()
+    gerenciador_de_downloads()
